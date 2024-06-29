@@ -1,0 +1,97 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Formulario de Pago{% endblock title %}
+{% block main-content %}
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-sm-6 offset-sm-3">
+            <h4>Información de Pago</h4>
+            <hr>
+            <form method="post" action="{% url 'payment_form' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="full_name" class="form-label">Nombre Completo</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name" pattern="[A-Za-z\s]+" title="El nombre completo no debe contener números" required>
+                </div>
+                <div class="mb-3">
+                    <label for="card_number" class="form-label">Número de Tarjeta de Débito</label>
+                    <input type="text" class="form-control" id="card_number" name="card_number" pattern="\d{4}\s\d{4}\s\d{4}\s\d{4}" placeholder="1234 5678 9123 4567" maxlength="19" required>
+                </div>
+                <div class="mb-3">
+                    <label for="expiry_date" class="form-label">Fecha de Expiración</label>
+                    <div class="d-flex">
+                        <select id="expiry_month" class="form-select me-2" required>
+                            <option value="" disabled selected>Mes</option>
+                        </select>
+                        <select id="expiry_year" class="form-select" required>
+                            <option value="" disabled selected>Año</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="expiry_date" name="expiry_date" required>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-warning mt-3 px-5 fw-bold">Pagar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function populateExpiryFields() {
+            const monthSelect = document.getElementById('expiry_month');
+            const yearSelect = document.getElementById('expiry_year');
+
+            for (let i = 1; i <= 12; i++) {
+                const monthOption = document.createElement('option');
+                monthOption.value = i < 10 ? '0' + i : i;
+                monthOption.text = i < 10 ? '0' + i : i;
+                monthSelect.appendChild(monthOption);
+            }
+
+            const currentYear = new Date().getFullYear();
+            for (let i = 0; i < 11; i++) {
+                const yearOption = document.createElement('option');
+                yearOption.value = currentYear + i;
+                yearOption.text = (currentYear + i).toString().substr(-2);
+                yearSelect.appendChild(yearOption);
+            }
+        }
+
+        populateExpiryFields();
+
+        const cardNumberInput = document.getElementById('card_number');
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i += 4) {
+                if (i > 0) formattedValue += ' ';
+                formattedValue += value.substring(i, i + 4);
+            }
+            e.target.value = formattedValue.substring(0, 19);
+        });
+
+        const fullNameInput = document.getElementById('full_name');
+        fullNameInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^A-Za-z\s]/g, '');
+            e.target.value = value;
+        });
+
+        const expiryMonthSelect = document.getElementById('expiry_month');
+        const expiryYearSelect = document.getElementById('expiry_year');
+        const expiryDateInput = document.getElementById('expiry_date');
+
+        function updateExpiryDate() {
+            const month = expiryMonthSelect.value;
+            const year = expiryYearSelect.value;
+            if (month && year) {
+                expiryDateInput.value = month + '/' + year;
+            }
+        }
+
+        expiryMonthSelect.addEventListener('change', updateExpiryDate);
+        expiryYearSelect.addEventListener('change', updateExpiryDate);
+    });
+</script>
+{% endblock main-content %}

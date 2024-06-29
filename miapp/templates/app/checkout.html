@@ -1,0 +1,89 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Detalle del pedido{% endblock title %}
+{% block main-content %}
+{% load humanize %}
+{% load custom_filters %}
+    <div class="container">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{msg}}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="row mt-5">
+            <div class="col-sm-6">
+                <h4>Detalle del pedido</h4>
+                <hr>
+                {% for item in cart_items %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h5>Producto : {{item.producto.nombre}}</h5>
+                            <p>Cantidad : {{item.cantidad}}</p>
+                            <p class="fw-bold">Precio: CLP$: {{item.producto.precio_formateado}}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+                <p class="fw-bold">Precio + Costo de Envio (CLP$:5.000) = CLP$:{{totalamount|intcomma_dot}}</p>
+                <div class="mb-3">
+                    <label for="terms" class="form-label">Términos y Condiciones</label>
+                    <textarea class="form-control" id="terms" rows="4" readonly>
+1. Aceptación de Términos
+    Al realizar una compra en nuestro sitio web, usted acepta los términos y condiciones aquí descritos.
+
+2. Información del Producto
+    Los productos y sus descripciones son lo más precisos posible. Sin embargo, no garantizamos que las descripciones sean completamente exactas, completas o libres de errores.
+
+3. Política de Pago
+    El pago debe realizarse en su totalidad en el momento de la compra. Aceptamos tarjetas de débito. Todos los pagos son procesados de forma segura.
+
+4. Política de Envío
+    El costo de envío será calculado y mostrado antes de finalizar la compra.
+
+5. Privacidad y Seguridad
+    Nos comprometemos a proteger su privacidad. La información personal proporcionada durante la compra será utilizada únicamente para procesar su pedido y no será compartida con terceros sin su consentimiento.
+
+6. Modificaciones de los Términos
+    Nos reservamos el derecho de modificar estos términos y condiciones en cualquier momento. Cualquier cambio será efectivo inmediatamente después de su publicación en nuestro sitio web.
+                    </textarea>
+                </div>
+            </div>
+            <div class="col-sm-4 offset-sm-1">
+                <h4>Seleccione Dirección de Envio</h4>
+                <hr>
+                <form method="post" action="" id:"myform">
+                    {% csrf_token %}
+                    {% for ad in add %}
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>{{ad.nombre}} {{ad.apellido}}</h5>
+                                <p>Teléfono : {{ad.telefono}}</p>
+                                <p>{{ad.ciudad}} {{ad.region}}</p>
+                            </div>
+                        </div>
+                        <div class="form-check mt-2 mb-5">
+                            <input class="form-check-input" type="radio" name="custid" id="Despacho" value="despacho">
+                            <label class="form-check-label fw-bold" for="Despacho">
+                                Despacho
+                            </label>
+                        </div>
+                        <div class="form-check mt-2 mb-5">
+                            <input class="form-check-input" type="radio" name="custid" id="retiroEnTienda" value="retiro">
+                            <label class="form-check-label fw-bold" for="retiroEnTienda">
+                                Retiro en Tienda
+                            </label>
+                        </div>                    
+                    {% endfor %}
+                    <div class="form-check mb-3">
+                        <label for="totalamount" class="form-label">Costo Total</label>
+                        <input type="number" class="form-control" name="totalamount" value={{totalamount|intcomma_dot}} readonly>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-warning mt-3 px-5 fw-bold">Pagar con Tarjeta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock main-content %}
